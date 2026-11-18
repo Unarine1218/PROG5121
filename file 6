@@ -1,0 +1,17 @@
+import org.junit.Test;
+import static org.junit.Assert.*;
+public class MessageTest {
+    @Test public void testLongest() {
+        Message.allMessagesList.clear();
+        Message.allMessagesList.add("Did you get the cake?");
+        Message.allMessagesList.add("Where are you? You are late! I have asked you to be on time.");
+        Message m = new Message();
+        assertEquals("Where are you? You are late! I have asked you to be on time.", m.displayLongestMessage());
+    }
+    @Test public void testSearchID() {
+        Message.messageIDs.clear(); Message.messageRecipients.clear(); Message.allMessagesList.clear();
+        Message.messageIDs.add("1234567890"); Message.messageRecipients.add("+27834557896");
+        Message.allMessagesList.add("Did you get the cake?");
+        assertEquals("+27834557896", Message.messageRecipients.get(0));
+    }
+}
