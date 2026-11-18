@@ -1,0 +1,127 @@
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.nio.file.*;
+
+public class Message {
+    public static ArrayList<String> sentMessages = new ArrayList<>();
+    public static ArrayList<String> disregardedMessages = new ArrayList<>();
+    public static ArrayList<String> storedMessages = new ArrayList<>();
+    public static ArrayList<String> messageHashes = new ArrayList<>();
+    public static ArrayList<String> messageIDs = new ArrayList<>();
+    public static ArrayList<String> messageRecipients = new ArrayList<>();
+    public static ArrayList<String> allMessagesList = new ArrayList<>();
+
+    private Random rand = new Random();
+
+    public String generateMessageID() {
+        long id = 1000000000L + (long)(rand.nextDouble() * 9000000000L);
+        return String.valueOf(id);
+    }
+    public boolean checkRecipientCell(String cell) {
+        return cell.matches("^\\+\\d{10,13}$") || cell.matches("^0\\d{9}$");
+    }
+    public String createMessageHash(String messageID, int numSent, String message) {
+        String[] words = message.trim().split("\\s+");
+        if (words.length == 1) return messageID.substring(0,2) + ":" + numSent + ":" + words[0].toUpperCase();
+        String first = words[0].toUpperCase();
+        String last = words[words.length - 1].toUpperCase();
+        return messageID.substring(0,2) + ":" + numSent + ":" + first + last;
+    }
+    public String sendMessageOption(int choice) {
+        if (choice == 1) return "Message successfully sent";
+        if (choice == 2) return "Press 0 to delete the message";
+        if (choice == 3) return "Message successfully stored";
+        return "Invalid";
+    }
+    public void storeMessageJSON(String id, String hash, String recipient, String message) {
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("messageID", id);
+            obj.put("messageHash", hash);
+            obj.put("recipient", recipient);
+            obj.put("message", message);
+            JSONArray arr;
+            File f = new File("stored.json");
+            if (f.exists() && f.length() > 0) {
+                String content = new String(Files.readAllBytes(Paths.get("stored.json")));
+                arr = new JSONArray(content);
+            } else {
+                arr = new JSONArray();
+            }
+            arr.put(obj);
+            Files.write(Paths.get("stored.json"), arr.toString(4).getBytes());
+        } catch (Exception e) {}
+    }
+    public void loadFromJson() {
+        try {
+            File f = new File("stored.json");
+            if (!f.exists()) return;
+            String content = new String(Files.readAllBytes(Paths.get("stored.json")));
+            JSONArray arr = new JSONArray(content);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.getJSONObject(i);
+                String id = o.getString("messageID");
+                if (!messageIDs.contains(id)) {
+                    messageIDs.add(id);
+                    messageHashes.add(o.getString("messageHash"));
+                    messageRecipients.add(o.getString("recipient"));
+                    String msg = o.getString("message");
+                    allMessagesList.add(msg);
+                    storedMessages.add(msg);
+                }
+            }
+        } catch (Exception e) {}
+    }
+    public void displaySendersAndRecipients() {
+        for (int i = 0; i < messageRecipients.size(); i++) {
+            System.out.println((i+1) + ". Recipient: " + messageRecipients.get(i) + " -> Message: " + allMessagesList.get(i));
+        }
+    }
+    public String displayLongestMessage() {
+        if (allMessagesList.isEmpty()) return "";
+        String longest = allMessagesList.get(0);
+        for (String s : allMessagesList) if (s.length() > longest.length()) longest = s;
+        System.out.println("Longest Message: " + longest);
+        return longest;
+    }
+    public void searchByID(String id) {
+        for (int i = 0; i < messageIDs.size(); i++) {
+            if (messageIDs.get(i).equals(id)) {
+                System.out.println("Recipient: " + messageRecipients.get(i));
+                System.out.println("Message: " + allMessagesList.get(i));
+                return;
+            }
+        }
+        System.out.println("ID not found");
+    }
+    public void searchByRecipient(String rec) {
+        for (int i = 0; i < messageRecipients.size(); i++) {
+            if (messageRecipients.get(i).equals(rec)) {
+                System.out.println("Found: " + allMessagesList.get(i));
+            }
+        }
+    }
+    public void deleteByHash(String hash) {
+        for (int i = 0; i < messageHashes.size(); i++) {
+            if (messageHashes.get(i).equals(hash)) {
+                System.out.println("Message \"" + allMessagesList.get(i) + "\" successfully deleted.");
+                allMessagesList.remove(i);
+                messageIDs.remove(i);
+                messageHashes.remove(i);
+                messageRecipients.remove(i);
+                storedMessages.remove(i);
+                return;
+            }
+        }
+    }
+    public void displayFullReport() {
+        for (int i = 0; i < allMessagesList.size(); i++) {
+            System.out.println("MessageID: " + messageIDs.get(i));
+            System.out.println("MessageHash: " + messageHashes.get(i));
+            System.out.println("Recipient: " + messageRecipients.get(i));
+            System.out.println("Message: " + allMessagesList.get(i));
+            System.out.println("-------------------");
+        }
+    }
+}
