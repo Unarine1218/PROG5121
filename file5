@@ -1,0 +1,57 @@
+import java.util.Scanner;
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Login login = new Login();
+        Message msgObj = new Message();
+        System.out.print("Enter First Name: "); String firstName = sc.nextLine();
+        System.out.print("Enter Last Name: "); String lastName = sc.nextLine();
+        System.out.print("Enter username (_ and <=5): "); String user = sc.nextLine();
+        System.out.print("Enter password: "); String pass = sc.nextLine();
+        System.out.print("Enter cell +27: "); String cell = sc.nextLine();
+        System.out.println(login.registerUser(user, pass, cell));
+        System.out.print("LOGIN username: "); String uLogin = sc.nextLine();
+        System.out.print("LOGIN password: "); String pLogin = sc.nextLine();
+        System.out.println(login.returnLoginStatus(uLogin, pLogin, user, pass, firstName, lastName));
+        if (!login.loginUser(uLogin, pLogin, user, pass)) return;
+        System.out.println("Welcome to QuickChat.");
+        msgObj.loadFromJson();
+        System.out.print("How many messages? "); int total = Integer.parseInt(sc.nextLine());
+        int sentCount = 0;
+        while (true) {
+            System.out.println("\n1) Send Messages\n2) Show recently sent\n3) Stored Messages Report\n4) Quit");
+            int choice = Integer.parseInt(sc.nextLine());
+            if (choice == 4) break;
+            if (choice == 2) { System.out.println("Coming Soon."); continue; }
+            if (choice == 3) {
+                System.out.println("a) Sender/Recipient\nb) Longest\nc) Search ID\nd) Search recipient\ne) Delete hash\nf) Full report");
+                String sub = sc.nextLine().toLowerCase();
+                if (sub.equals("a")) msgObj.displaySendersAndRecipients();
+                if (sub.equals("b")) msgObj.displayLongestMessage();
+                if (sub.equals("c")) { System.out.print("Enter ID: "); msgObj.searchByID(sc.nextLine()); }
+                if (sub.equals("d")) { System.out.print("Enter Recipient: "); msgObj.searchByRecipient(sc.nextLine()); }
+                if (sub.equals("e")) { System.out.print("Enter Hash: "); msgObj.deleteByHash(sc.nextLine()); }
+                if (sub.equals("f")) msgObj.displayFullReport();
+                continue;
+            }
+            if (sentCount >= total) { System.out.println("Max reached"); continue; }
+            System.out.print("Recipient cell: "); String rec = sc.nextLine();
+            if (!msgObj.checkRecipientCell(rec)) { System.out.println("Cell incorrectly formatted"); continue; }
+            System.out.print("Message (max 250): "); String messageText = sc.nextLine();
+            if (messageText.length() > 250) { System.out.println("Too long"); continue; }
+            String id = msgObj.generateMessageID();
+            sentCount++;
+            String hash = msgObj.createMessageHash(id, sentCount, messageText);
+            System.out.println("1) Send 2) Disregard 3) Store"); int flag = Integer.parseInt(sc.nextLine());
+            System.out.println(msgObj.sendMessageOption(flag));
+            Message.messageIDs.add(id); Message.messageHashes.add(hash);
+            Message.messageRecipients.add(rec); Message.allMessagesList.add(messageText);
+            if (flag == 1) Message.sentMessages.add(messageText);
+            else if (flag == 2) Message.disregardedMessages.add(messageText);
+            else if (flag == 3) { Message.storedMessages.add(messageText); msgObj.storeMessageJSON(id, hash, rec, messageText); }
+            System.out.println("ID: " + id + " Hash: " + hash);
+        }
+        System.out.println("Total: " + sentCount);
+        sc.close();
+    }
+}
