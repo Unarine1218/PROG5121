@@ -1,0 +1,26 @@
+[
+    {
+        "messageID": "1234567890",
+        "messageHash": "12:1:DIDCAKE?",
+        "recipient": "+27834557896",
+        "message": "Did you get the cake?"
+    },
+    {
+        "messageID": "2345678901",
+        "messageHash": "23:2:WHERETIME.",
+        "recipient": "+27838884567",
+        "message": "Where are you? You are late! I have asked you to be on time."
+    },
+    {
+        "messageID": "3456789012",
+        "messageHash": "34:3:YOHOOOGATE.",
+        "recipient": "+27834484567",
+        "message": "Yohoooo, I am at your gate."
+    },
+    {
+        "messageID": "4567890123",
+        "messageHash": "45:4:ITTIME!",
+        "recipient": "0838884567",
+        "message": "It is dinner time !"
+    }
+]
